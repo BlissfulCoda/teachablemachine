@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Classifier AI - Train Your Vision Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-pattern"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <span>Classifier AI</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                    <span class="theme-icon" id="theme-icon">🌙</span>
+                    <span id="theme-text">Dark</span>
+                </button>
+                <div class="badge">Educational Edition</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Train Your Vision Model</h1>
+            <p>Build an AI that can recognize images using machine learning. No coding required—just upload, train, and test.</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="steps">
+            <div class="step active" id="step-1">
+                <div class="step-number">1</div>
+                <div class="step-label">Collect Data</div>
+            </div>
+            <div class="step" id="step-2">
+                <div class="step-number">2</div>
+                <div class="step-label">Train Model</div>
+            </div>
+            <div class="step" id="step-3">
+                <div class="step-number">3</div>
+                <div class="step-label">Test & Predict</div>
+            </div>
+        </div>
+
+        <!-- Data Collection -->
+        <div class="main-grid">
+            <!-- Happy Class -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">😊</span>
+                        <span>Happy Faces</span>
+                    </div>
+                    <div class="card-count">
+                        <span id="happy-count">0</span> images
+                    </div>
+                </div>
+                
+                <div class="upload-zone" onclick="document.getElementById('happy-input').click()" id="happy-drop-zone">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Tap to upload images</div>
+                    <div class="upload-subtext">Select multiple images at once</div>
+                </div>
+                <input type="file" id="happy-input" accept="image/*" multiple>
+
+                <div class="gallery" id="happy-gallery">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🖼️</div>
+                        <div>No images yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sad Class -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">😢</span>
+                        <span>Sad Faces</span>
+                    </div>
+                    <div class="card-count">
+                        <span id="sad-count">0</span> images
+                    </div>
+                </div>
+                
+                <div class="upload-zone" onclick="document.getElementById('sad-input').click()" id="sad-drop-zone">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Tap to upload images</div>
+                    <div class="upload-subtext">Select multiple images at once</div>
+                </div>
+                <input type="file" id="sad-input" accept="image/*" multiple>
+
+                <div class="gallery" id="sad-gallery">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🖼️</div>
+                        <div>No images yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Train Section -->
+        <div class="train-section">
+            <button class="btn btn-large" id="train-btn" disabled>
+                <span>🚀</span>
+                <span>Train Model</span>
+            </button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section hidden" id="progress-section">
+            <div class="progress-header">
+                <div class="progress-label">Training Progress</div>
+                <div class="progress-value"><span id="progress-percent">0</span>%</div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Test Section -->
+        <div class="test-section hidden" id="test-section">
+            <div class="test-header">
+                <h2>🧪 Test Your Model</h2>
+                <p>Upload an image to see what your AI predicts</p>
+            </div>
+
+            <div class="test-grid">
+                <div class="test-upload-area">
+                    <div class="upload-zone" onclick="document.getElementById('test-input').click()">
+                        <div class="upload-icon">🎯</div>
+                        <div class="upload-text">Tap to upload test image</div>
+                        <div class="upload-subtext">See how well your model performs</div>
+                    </div>
+                    <input type="file" id="test-input" accept="image/*">
+
+                    <div class="test-image-container hidden" id="test-image-container">
+                        <img id="test-image" class="test-image">
+                    </div>
+                </div>
+
+                <div class="results-container">
+                    <div class="result-card hidden" id="result-card">
+                        <div class="result-emoji" id="result-emoji">🤔</div>
+                        <div class="result-label" id="result-label">Analyzing...</div>
+                        
+                        <div class="confidence-meter">
+                            <div class="confidence-label">Confidence Level</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill" style="width: 0%">
+                                    <span id="confidence-text">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Section -->
+                        <div class="feedback-section hidden" id="feedback-section">
+                            <div class="feedback-question">Was this prediction correct?</div>
+                            <div class="feedback-buttons">
+                                <button class="btn-feedback btn-correct" onclick="handleFeedback(true)">
+                                    <span>✓</span>
+                                    <span>Yes, Correct!</span>
+                                </button>
+                                <button class="btn-feedback btn-wrong" onclick="handleFeedback(false)">
+                                    <span>✗</span>
+                                    <span>No, Wrong</span>
+                                </button>
+                            </div>
+
+                            <!-- Correction Panel -->
+                            <div class="correction-panel hidden" id="correction-panel">
+                                <div class="correction-question">What should it have been?</div>
+                                <div class="correction-buttons">
+                                    <button class="btn-correction btn-correction-happy" onclick="correctPrediction('happy')">
+                                        <span>😊</span>
+                                        <span>Happy</span>
+                                    </button>
+                                    <button class="btn-correction btn-correction-sad" onclick="correctPrediction('sad')">
+                                        <span>😢</span>
+                                        <span>Sad</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="result-empty">
+                        <div class="empty-state-icon">📊</div>
+                        <div>Upload an image to see predictions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
