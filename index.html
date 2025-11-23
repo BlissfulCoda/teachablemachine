@@ -1,216 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Classifier AI - Train Your Vision Model</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.4"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Text:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="bg-pattern"></div>
 
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">🧠</div>
-                <span>Classifier AI</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
-                    <span class="theme-icon" id="theme-icon">🌙</span>
-                    <span id="theme-text">Dark</span>
-                </button>
-                <div class="badge">Educational Edition</div>
-            </div>
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">🧠</div>
+          <span class="logo-text">Teachable Machine AI</span>
         </div>
+        <div class="header-actions">
+          <button
+            class="pill-button pill-menu"
+            id="theme-toggle"
+            onclick="toggleTheme()"
+          >
+            <svg
+              class="menu-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 12H21M3 6H21M3 18H21"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            <div class="pill-divider"></div>
+            <img
+              src="Moon.svg"
+              alt="Moon"
+              class="theme-icon"
+              id="theme-icon-img"
+            />
+          </button>
+          <div class="pill-button pill-profile">
+            <img src="Romie.svg" alt="Ro'mie" class="profile-picture" />
+            <span class="profile-text">Designed By Ro'mie</span>
+            <svg
+              class="play-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 5V19L19 12L8 5Z" fill="currentColor" />
+            </svg>
+          </div>
+        </div>
+      </div>
     </header>
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Hero Section -->
-        <div class="hero">
-            <h1>Train Your Vision Model</h1>
-            <p>Build an AI that can recognize images using machine learning. No coding required—just upload, train, and test.</p>
-        </div>
+      <!-- Hero Section -->
+      <div class="hero">
+        <h1>Train Your Vision Model</h1>
+        <p>
+          Build an AI that can recognize images using machine learning. No
+          coding required—just upload, train, and test.
+        </p>
+      </div>
 
+      <!-- Template Selector -->
+      <div class="template-selector" id="template-selector">
+        <div class="template-selector-content">
+          <h2>🎯 Choose a Template</h2>
+          <p>Start with a preset template or begin with emotions</p>
+          <div class="template-grid">
+            <div class="template-card" onclick="selectTemplate('emotions')">
+              <div class="template-icon">😊</div>
+              <div class="template-name">Emotions</div>
+              <div class="template-classes">😊 Happy, 😢 Sad</div>
+            </div>
+            <div class="template-card" onclick="selectTemplate('fruits')">
+              <div class="template-icon">🍎</div>
+              <div class="template-name">Fruits</div>
+              <div class="template-classes">🍎 Apples, 🍊 Oranges</div>
+            </div>
+            <div class="template-card" onclick="selectTemplate('school')">
+              <div class="template-icon">✏️</div>
+              <div class="template-name">School Supplies</div>
+              <div class="template-classes">✏️ Pencils, ✒️ Pens</div>
+            </div>
+            <div class="template-card" onclick="selectTemplate('animals')">
+              <div class="template-icon">🐶</div>
+              <div class="template-name">Animals</div>
+              <div class="template-classes">🐶 Dogs, 🐱 Cats</div>
+            </div>
+          </div>
+          <button
+            class="btn btn-secondary"
+            onclick="selectTemplate('emotions')"
+            style="margin-top: 1.5rem"
+          >
+            Start with Emotions (Default)
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content (hidden initially) -->
+      <div id="main-content" class="hidden">
         <!-- Progress Steps -->
         <div class="steps">
-            <div class="step active" id="step-1">
-                <div class="step-number">1</div>
-                <div class="step-label">Collect Data</div>
-            </div>
-            <div class="step" id="step-2">
-                <div class="step-number">2</div>
-                <div class="step-label">Train Model</div>
-            </div>
-            <div class="step" id="step-3">
-                <div class="step-number">3</div>
-                <div class="step-label">Test & Predict</div>
-            </div>
+          <div class="step active" id="step-1">
+            <div class="step-number">1</div>
+            <div class="step-label">Collect Data</div>
+          </div>
+          <div class="step" id="step-2">
+            <div class="step-number">2</div>
+            <div class="step-label">Train Model</div>
+          </div>
+          <div class="step" id="step-3">
+            <div class="step-number">3</div>
+            <div class="step-label">Test & Predict</div>
+          </div>
+        </div>
+
+        <!-- Back to Templates Button -->
+        <div class="back-button-section">
+          <button class="btn btn-secondary" onclick="goBackToTemplates()">
+            <span>←</span>
+            <span>Change Template</span>
+          </button>
+        </div>
+
+        <!-- Progress Indicators -->
+        <div class="progress-indicators-section">
+          <h3>📊 Collection Progress</h3>
+          <div class="progress-indicators" id="progress-indicators"></div>
         </div>
 
         <!-- Data Collection -->
-        <div class="main-grid">
-            <!-- Happy Class -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">😊</span>
-                        <span>Happy Faces</span>
-                    </div>
-                    <div class="card-count">
-                        <span id="happy-count">0</span> images
-                    </div>
-                </div>
-                
-                <div class="upload-zone" id="happy-drop-zone">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">Tap to upload images</div>
-                    <div class="upload-subtext">Select multiple images at once</div>
-                </div>
-                <input type="file" id="happy-input" accept="image/*" multiple>
-
-                <div class="gallery" id="happy-gallery">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🖼️</div>
-                        <div>No images yet</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sad Class -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">😢</span>
-                        <span>Sad Faces</span>
-                    </div>
-                    <div class="card-count">
-                        <span id="sad-count">0</span> images
-                    </div>
-                </div>
-                
-                <div class="upload-zone" id="sad-drop-zone">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">Tap to upload images</div>
-                    <div class="upload-subtext">Select multiple images at once</div>
-                </div>
-                <input type="file" id="sad-input" accept="image/*" multiple>
-
-                <div class="gallery" id="sad-gallery">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🖼️</div>
-                        <div>No images yet</div>
-                    </div>
-                </div>
-            </div>
+        <div class="main-grid" id="main-grid">
+          <!-- Classes will be dynamically generated here -->
         </div>
 
         <!-- Train Section -->
         <div class="train-section">
-            <button class="btn btn-large" id="train-btn" disabled>
-                <span>🚀</span>
-                <span>Train Model</span>
-            </button>
+          <button class="btn btn-large" id="train-btn" disabled>
+            <span>🚀</span>
+            <span>Train Model</span>
+          </button>
         </div>
 
         <!-- Progress Section -->
         <div class="progress-section hidden" id="progress-section">
-            <div class="progress-header">
-                <div class="progress-label">Training Progress</div>
-                <div class="progress-value"><span id="progress-percent">0</span>%</div>
+          <div class="progress-header">
+            <div class="progress-label">Training Progress</div>
+            <div class="progress-value">
+              <span id="progress-percent">0</span>%
             </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
-            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+          </div>
         </div>
 
         <!-- Test Section -->
         <div class="test-section hidden" id="test-section">
-            <div class="test-header">
-                <h2>🧪 Test Your Model</h2>
-                <p>Upload an image to see what your AI predicts</p>
+          <div class="test-header">
+            <h2>🧪 Test Your Model</h2>
+            <p>Upload an image to see what your AI predicts</p>
+          </div>
+
+          <div class="test-grid">
+            <div class="test-upload-area">
+              <div class="upload-zone" id="test-drop-zone">
+                <div class="upload-icon">🎯</div>
+                <div class="upload-text">Tap to upload test image</div>
+                <div class="upload-subtext">
+                  See how well your model performs
+                </div>
+              </div>
+              <input type="file" id="test-input" accept="image/*" />
+
+              <div
+                class="test-image-container hidden"
+                id="test-image-container"
+              >
+                <img id="test-image" class="test-image" />
+              </div>
             </div>
 
-            <div class="test-grid">
-                <div class="test-upload-area">
-                    <div class="upload-zone" id="test-drop-zone">
-                        <div class="upload-icon">🎯</div>
-                        <div class="upload-text">Tap to upload test image</div>
-                        <div class="upload-subtext">See how well your model performs</div>
-                    </div>
-                    <input type="file" id="test-input" accept="image/*">
+            <div class="results-container">
+              <div class="result-card hidden" id="result-card">
+                <div class="result-emoji" id="result-emoji">🤔</div>
+                <div class="result-label" id="result-label">Analyzing...</div>
 
-                    <div class="test-image-container hidden" id="test-image-container">
-                        <img id="test-image" class="test-image">
+                <div class="confidence-meter">
+                  <div class="confidence-label">Confidence Level</div>
+                  <div class="confidence-bar">
+                    <div
+                      class="confidence-fill"
+                      id="confidence-fill"
+                      style="width: 0%"
+                    >
+                      <span id="confidence-text">0%</span>
                     </div>
+                  </div>
                 </div>
 
-                <div class="results-container">
-                    <div class="result-card hidden" id="result-card">
-                        <div class="result-emoji" id="result-emoji">🤔</div>
-                        <div class="result-label" id="result-label">Analyzing...</div>
-                        
-                        <div class="confidence-meter">
-                            <div class="confidence-label">Confidence Level</div>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill" id="confidence-fill" style="width: 0%">
-                                    <span id="confidence-text">0%</span>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Feedback Section -->
+                <div class="feedback-section hidden" id="feedback-section">
+                  <div class="feedback-question">
+                    Was this prediction correct?
+                  </div>
+                  <div class="feedback-buttons">
+                    <button
+                      class="btn-feedback btn-correct"
+                      onclick="handleFeedback(true)"
+                    >
+                      <span>✓</span>
+                      <span>Yes, Correct!</span>
+                    </button>
+                    <button
+                      class="btn-feedback btn-wrong"
+                      onclick="handleFeedback(false)"
+                    >
+                      <span>✗</span>
+                      <span>No, Wrong</span>
+                    </button>
+                  </div>
 
-                        <!-- Feedback Section -->
-                        <div class="feedback-section hidden" id="feedback-section">
-                            <div class="feedback-question">Was this prediction correct?</div>
-                            <div class="feedback-buttons">
-                                <button class="btn-feedback btn-correct" onclick="handleFeedback(true)">
-                                    <span>✓</span>
-                                    <span>Yes, Correct!</span>
-                                </button>
-                                <button class="btn-feedback btn-wrong" onclick="handleFeedback(false)">
-                                    <span>✗</span>
-                                    <span>No, Wrong</span>
-                                </button>
-                            </div>
-
-                            <!-- Correction Panel -->
-                            <div class="correction-panel hidden" id="correction-panel">
-                                <div class="correction-question">What should it have been?</div>
-                                <div class="correction-buttons">
-                                    <button class="btn-correction btn-correction-happy" onclick="correctPrediction('happy')">
-                                        <span>😊</span>
-                                        <span>Happy</span>
-                                    </button>
-                                    <button class="btn-correction btn-correction-sad" onclick="correctPrediction('sad')">
-                                        <span>😢</span>
-                                        <span>Sad</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                  <!-- Correction Panel -->
+                  <div class="correction-panel hidden" id="correction-panel">
+                    <div class="correction-question">
+                      What should it have been?
                     </div>
-
-                    <div class="empty-state" id="result-empty">
-                        <div class="empty-state-icon">📊</div>
-                        <div>Upload an image to see predictions</div>
+                    <div class="correction-buttons" id="correction-buttons">
+                      <!-- Dynamically generated -->
                     </div>
+                  </div>
                 </div>
+              </div>
+
+              <div class="empty-state" id="result-empty">
+                <div class="empty-state-icon">📊</div>
+                <div>Upload an image to see predictions</div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
-
-
