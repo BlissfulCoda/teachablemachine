@@ -96,15 +96,51 @@ function setupFileHandlers(inputId, className, dropZoneId) {
         handleFiles(e.dataTransfer.files, className);
     });
 
-    // Touch event handlers for better iPad support
+    // Improved touch and click handlers for better iPad/tablet support
     let touchStartTime;
+    let touchStartX;
+    let touchStartY;
+    let hasMoved = false;
+
+    // Touch start - record position and time
     dropZone.addEventListener('touchstart', (e) => {
         touchStartTime = Date.now();
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        hasMoved = false;
+        e.preventDefault(); // Prevent default to avoid scrolling issues
+    }, { passive: false });
+
+    // Touch move - check if user is scrolling
+    dropZone.addEventListener('touchmove', (e) => {
+        if (e.touches[0]) {
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartX);
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+            if (deltaX > 10 || deltaY > 10) {
+                hasMoved = true;
+            }
+        }
     });
 
+    // Touch end - trigger file input if it was a tap
     dropZone.addEventListener('touchend', (e) => {
+        e.preventDefault();
         const touchDuration = Date.now() - touchStartTime;
-        if (touchDuration < 500) {
+        // Only trigger if it was a quick tap (not a long press or scroll)
+        if (touchDuration < 500 && !hasMoved) {
+            // Small delay to ensure touch events are fully processed
+            setTimeout(() => {
+                input.click();
+            }, 50);
+        }
+    }, { passive: false });
+
+    // Click handler for mouse/desktop (fallback)
+    dropZone.addEventListener('click', (e) => {
+        // Only trigger on click if it wasn't already triggered by touch
+        if (e.type === 'click' && !e.touches) {
             input.click();
         }
     });
@@ -271,7 +307,53 @@ function updateProgress(percent) {
 let currentTestImage = null;
 let currentTestFeatures = null;
 
-document.getElementById('test-input').addEventListener('change', async (e) => {
+// Setup test input handler
+const testInput = document.getElementById('test-input');
+const testDropZone = document.getElementById('test-drop-zone');
+
+// Setup touch handlers for test input
+let testTouchStartTime;
+let testTouchStartX;
+let testTouchStartY;
+let testHasMoved = false;
+
+testDropZone.addEventListener('touchstart', (e) => {
+    testTouchStartTime = Date.now();
+    const touch = e.touches[0];
+    testTouchStartX = touch.clientX;
+    testTouchStartY = touch.clientY;
+    testHasMoved = false;
+    e.preventDefault();
+}, { passive: false });
+
+testDropZone.addEventListener('touchmove', (e) => {
+    if (e.touches[0]) {
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - testTouchStartX);
+        const deltaY = Math.abs(touch.clientY - testTouchStartY);
+        if (deltaX > 10 || deltaY > 10) {
+            testHasMoved = true;
+        }
+    }
+});
+
+testDropZone.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const touchDuration = Date.now() - testTouchStartTime;
+    if (touchDuration < 500 && !testHasMoved) {
+        setTimeout(() => {
+            testInput.click();
+        }, 50);
+    }
+}, { passive: false });
+
+testDropZone.addEventListener('click', (e) => {
+    if (e.type === 'click' && !e.touches) {
+        testInput.click();
+    }
+});
+
+testInput.addEventListener('change', async (e) => {
     if (!isModelTrained) {
         showToast('Please train the model first!', 'error');
         return;
@@ -389,4 +471,5 @@ loadMobileNet();
 setupFileHandlers('happy-input', 'happy', 'happy-drop-zone');
 setupFileHandlers('sad-input', 'sad', 'sad-drop-zone');
 document.getElementById('train-btn').addEventListener('click', trainModel);
+
 
